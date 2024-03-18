@@ -1,0 +1,57 @@
+---
+title: "CH2_Data_Wrangling"
+author: "LA"
+date: "2024-03-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library("tidyverse")
+pong_data <- read_csv("PongBlueRedBack 1-16 Codebook.csv")
+```
+
+### Task 1: Using the select() function
+```{r}
+select(pong_data, Participant, PaddleLength, TrialNumber, BackgroundColor, HitOrMiss)
+
+# Alphabetical order. 
+select(pong_data, BackgroundColor, HitOrMiss, PaddleLength, Participant, TrialNumber)
+
+# Probably not saving these tables to any specific variables. 
+```
+### Task 2: Arranging Data with the arrange() function
+```{r}
+arrange(pong_data, desc(HitOrMiss), desc(JudgedSpeed))
+```
+### Task 3: Using the filter() Function
+```{r}
+
+pong_fast_miss <- filter(pong_data, HitOrMiss==0, JudgedSpeed==1, BallSpeed %in% c(2, 4, 5, 7))
+
+```
+
+### Task 4: Mutating variables with mutate()
+```{r}
+pong_data_filt <- filter(pong_data, TrialNumber != 1)
+pong_data2 <- mutate(pong_data_filt, TrialNumber = TrialNumber + 1)
+
+```
+
+### Task 5: Grouping Data with group_by()
+```{r}
+group_by(pong_data2, BlockNumber, BackgroundColor)
+
+```
+### Task 6: Summarising Data with summarise()
+```{r}
+pong_data2_group <- group_by(pong_data2, BackgroundColor, PaddleLength)
+pong_data2_hits <- summarise(pong_data2_group, mean_hits = mean(HitOrMiss))
+mean_hits_red_small <- filter(pong_data2_hits, BackgroundColor == "red", PaddleLength == 50)
+mean_hits_red_small
+
+```
+
+
+
