@@ -1,0 +1,54 @@
+---
+title: "Chapter3_visualisations"
+author: "LA"
+date: "2024-03-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library("tidyverse")
+
+menrot <- read_csv("MentalRotationBehavioralData.csv")
+demog <- read_csv("demographics.csv")
+```
+
+```{r}
+menrot_time_age <- group_by(menrot, Participant) %>% 
+  summarise(Mean_Time = mean(Time, na.rm = TRUE)) %>%
+  inner_join(demog, "Participant")
+
+ggplot(data = menrot_time_age, 
+       aes(x = Age, 
+           y = Mean_Time, 
+           color = Sex)) +
+  geom_point()
+```
+
+```{r}
+menrot_hist_correct <- group_by(menrot, Participant, CorrectResponse) %>% 
+  summarise(Mean_Time = mean(Time, na.rm = TRUE)) %>%
+  filter(CorrectResponse == "Correct")
+
+ggplot(data = menrot_hist_correct, 
+       aes(x = Mean_Time)) + 
+  geom_histogram()
+```
+
+```{r}
+menrot_box_correct <- group_by(menrot, Participant, CorrectResponse) %>% 
+  summarise(Mean_Time = mean(Time, na.rm = TRUE)) %>%
+  inner_join(demog, "Participant")
+
+ggplot(data = menrot_box_correct, 
+       aes(x = CorrectResponse, 
+           y = Mean_Time, 
+           fill = CorrectResponse)) + 
+  geom_boxplot() +
+  guides(fill = FALSE)
+```
+
+
