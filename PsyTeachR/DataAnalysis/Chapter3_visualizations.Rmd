@@ -51,4 +51,58 @@ ggplot(data = menrot_box_correct,
   guides(fill = FALSE)
 ```
 
+```{r}
+menrot_box_correct <- group_by(menrot, Participant, CorrectResponse) %>% 
+  summarise(Mean_Time = mean(Time, na.rm = TRUE)) %>%
+  inner_join(demog, "Participant")
+
+ggplot(data = menrot_box_correct, 
+       aes(x = CorrectResponse, 
+           y = Mean_Time, 
+           fill = CorrectResponse)) + 
+  geom_violin(trim = FALSE) +
+  geom_boxplot(width = 0.2) +
+  guides(fill = FALSE)
+```
+
+```{r}
+total_n_trials <- 96
+
+menrot_resp_sex <- count(menrot, Participant, CorrectResponse) %>% 
+  inner_join(demog, "Participant") %>%
+  mutate(PercentPerParticipant = (n/total_n_trials)*100) %>%
+  group_by(Sex, CorrectResponse) %>%
+  summarise(Avg_Percent = mean(PercentPerParticipant))
+
+ggplot(data = menrot_resp_sex, 
+       aes(x = Sex, 
+           y = Avg_Percent, 
+           fill = CorrectResponse)) + 
+  geom_bar(stat = "identity", 
+           position = position_dodge(.9))
+```
+
+```{r}
+total_n_trials <- 96
+
+menrot_better_plot <- count(menrot, Participant, CorrectResponse) %>% 
+  inner_join(demog, "Participant") %>%
+  mutate(PercentPerParticipant = n/total_n_trials) %>%
+  group_by(Sex, CorrectResponse) %>%
+  summarise(Avg_Percent = mean(PercentPerParticipant))
+
+ggplot(data = menrot_better_plot, 
+       aes(x = Sex,
+           y = Avg_Percent, 
+           fill = CorrectResponse)) + 
+  geom_col(position = position_dodge(.9)) +
+  labs(x = "Sex of Participant", 
+       y = "Percent Average (%)") +
+  guides(fill = FALSE) +
+  facet_wrap(~CorrectResponse) +
+  theme_classic()
+```
+
+
+
 

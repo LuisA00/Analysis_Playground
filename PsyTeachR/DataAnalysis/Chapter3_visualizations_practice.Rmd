@@ -1,0 +1,127 @@
+---
+title: "Chapter3_visualizations_practice"
+author: "LA"
+date: "2024-03-25"
+output: html_document
+---
+
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 3.3.2 Task 1: Loading and Viewing the Data
+```{r}
+library("tidyverse")
+
+menrot <- read_csv("MentalRotationBehavioralData.csv")
+demog <- read_csv("demographics.csv")
+
+menrot_dim <- dim(menrot)
+demog_dim <- dim(demog)
+
+```
+
+# 3.3.3 Task 2: Recreating the Figure
+```{r}
+menrot_angle <- filter(menrot, CorrectResponse == "Correct") %>%
+  inner_join(demog, "Participant") %>%
+  group_by(Angle) %>% 
+  summarise(mean_Resp = mean(Time))
+
+ggplot(data = menrot_angle, aes(x = Angle, y = mean_Resp)) + 
+  geom_point() +
+  geom_line() +
+  coord_cartesian(ylim = c(0, 3500), expand = TRUE)
+```
+
+# 3.3.4 Task 3: Examining Additional Variable Effects
+```{r}
+menrot_angle <- filter(menrot, CorrectResponse == "Correct") %>%
+  inner_join(demog, "Participant") %>%
+  group_by(Angle, Sex) %>% 
+  summarise(mean_Resp = mean(Time))
+
+ggplot(data = menrot_angle, aes(x = Angle, y = mean_Resp)) + 
+  geom_point() +
+  geom_line() +
+  coord_cartesian(ylim = c(0, 3500), expand = TRUE)
+```
+
+#3.3.5 Task 4: Grouping the Figure Data
+```{r}
+
+menrot_angle <- filter(menrot, CorrectResponse == "Correct") %>%
+  inner_join(demog, "Participant") %>%
+  group_by(Angle, Sex) %>% 
+  summarise(mean_Resp = mean(Time))
+
+ggplot(data = menrot_angle, aes(x = Angle, y = mean_Resp, group = Sex)) + 
+  geom_point() +
+  geom_line() +
+  coord_cartesian(ylim = c(0, 3500), expand = TRUE)
+
+```
+
+# 3.3.6 Task 5: Identifying Groups Using aes()
+```{r}
+menrot_angle <- filter(menrot, CorrectResponse == "Correct") %>%
+  inner_join(demog, "Participant") %>%
+  group_by(Angle, Sex) %>% 
+  summarise(mean_Resp = mean(Time))
+
+ggplot(data = menrot_angle, aes(x = Angle, y = mean_Resp, group = Sex)) + 
+  geom_point(aes(color=Sex)) +
+  geom_line() +
+  coord_cartesian(ylim = c(0, 3500), expand = TRUE)
+```
+# 3.3.7 Task 6: Changing the Shape and Size of Data Points
+```{r}
+menrot_angle <- filter(menrot, CorrectResponse == "Correct") %>%
+  inner_join(demog, "Participant") %>%
+  group_by(Angle, Sex) %>% 
+  summarise(mean_Resp = mean(Time))
+
+ggplot(data = menrot_angle, aes(x = Angle, y = mean_Resp, group = Sex)) + 
+  geom_point(aes(color=Sex, shape=Sex), size=3) +
+  geom_line() +
+  coord_cartesian(ylim = c(0, 3500), expand = TRUE)
+```
+
+# 3.3.8 Task 7: Adding Labels and Changing the Background
+```{r}
+menrot_angle <- filter(menrot, CorrectResponse == "Correct") %>%
+  inner_join(demog, "Participant") %>%
+  group_by(Angle, Sex) %>% 
+  summarise(mean_Resp = mean(Time))
+
+ggplot(data = menrot_angle, aes(x = Angle, y = mean_Resp, group = Sex)) + 
+  geom_point(aes(color=Sex, shape=Sex), size=3) +
+  geom_line() +
+  coord_cartesian(ylim = c(0, 3500), expand = TRUE) + 
+
+labs(x = "Angle of Rotation (degrees)", y = "Mean Reaction Time (ms)", title = "No title") + 
+theme_bw()
+```
+
+
+# 3.3.9 Task 8: Separating a Variable and Removing Legends
+```{r}
+menrot_angle <- filter(menrot, CorrectResponse == "Correct") %>%
+  inner_join(demog, "Participant") %>%
+  group_by(Angle, Sex) %>% 
+  summarise(mean_Resp = mean(Time))
+
+ggplot(data = menrot_angle, aes(x = Angle, y = mean_Resp, group = Sex)) + 
+  geom_point(aes(color=Sex, shape=Sex), size=3) +
+  geom_line() +
+  coord_cartesian(ylim = c(0, 3500), expand = TRUE) + 
+
+labs(x = "Angle of Rotation (degrees)", y = "Mean Reaction Time (ms)", title = "No title") + 
+facet_wrap(~Sex) + 
+guides(group = FALSE, color = FALSE, shape = FALSE) +
+theme_bw() 
+```
+
