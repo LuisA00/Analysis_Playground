@@ -1,0 +1,108 @@
+---
+title: "Chapter4_RevisitingProbability"
+author: "LA"
+date: "2024-03-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+set.seed(1409)
+library("tidyverse")
+sample(c("HEADS", "TAILS"), 10, TRUE) 
+```
+```{r}
+sample(0:1, 10, TRUE) %>% sum() 
+```
+```{r}
+heads10k <- replicate(10000, sample(0:1, 10, TRUE) %>% sum())   
+```
+
+```{r}
+data10k <- tibble(heads = heads10k) %>%       # creating a tibble/data frame
+                group_by(heads) %>%           # group by number of possibilities
+                summarise(n = n(), p=n/10000) # count occurences of possibility,
+                                              # & calculate probability (p) of
+                                              # each
+```
+
+```{r}
+ggplot(data10k, aes(heads,p)) + 
+  geom_col(fill = "skyblue") + 
+  labs(x = "Number of Heads", y = "Probability of Heads in 10 flips (p)") +
+  theme_bw() +
+  scale_x_discrete(limits=0:10)
+```
+dbinom(x, size, prob) -> This function gives you probability of 'x' occurring given a set 'size' and given its probability of happening in a single trial.
+```{r}
+dbinom(3, 10, 0.5)
+```
+
+```{r}
+dbinom(0:10, 10, 0.5)
+```
+
+```{r}
+dbinom(0:3, 10, 0.5) %>% sum()
+```
+
+```{r}
+pbinom(3, 10, 0.5, lower.tail = TRUE)  
+```
+
+```{r}
+pbinom(50, 100, 0.5, lower.tail = FALSE) 
+```
+
+```{r}
+p1 <- pbinom(49, 100, .5, lower.tail = TRUE)
+p1
+```
+
+```{r}
+qbinom(p1, 100, .5, lower.tail = TRUE)
+```
+```{r}
+qbinom(.1, 17, 0.5, lower.tail = TRUE) 
+```
+
+# 4.3.3.1 Task 1: Standard Deviations and IQ Score Distribution
+```{r}
+
+IQ_data <- tibble(IQ_range = c(40, 160))
+
+ggplot(IQ_data, aes(IQ_range)) + 
+  stat_function(fun = dnorm, args = list(mean = 100, sd = 10)) +
+  labs(x = "IQ Score", y = "probability") +
+  theme_classic()
+
+```
+# 4.3.3.2 Task 2: Changing Range and Step Size of The Normal Distribution
+```{r}
+ND_data <- tibble(ND_range = seq(-4, 4, 0.01))
+ggplot(ND_data, aes(ND_range)) + 
+  stat_function(fun = dnorm, args = list(mean = 0, sd = 1)) +
+  labs(x = "SD units", y = "probability", title = "The Normal Distribution") +
+  theme_classic()
+```
+
+# 4.3.4.1 Task 3: Calculating Cumulative Probability of Height
+```{r}
+pnorm(190, 170, 7, lower.tail = FALSE)
+```
+
+```{r}
+pnorm(185, 170, 7, lower.tail = FALSE)
+```
+# 4.3.5.1 Task 5: Using pnorm() and qnorm() to find probability and cut-off values
+```{r}
+qnorm(0.95, 100, 15) 
+pnorm(105, 100, 15, lower.tail = FALSE) - 
+  pnorm(110, 100, 15, lower.tail = FALSE)
+```
+
+
+

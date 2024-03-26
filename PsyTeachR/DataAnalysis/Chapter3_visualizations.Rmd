@@ -44,7 +44,7 @@ menrot_box_correct <- group_by(menrot, Participant, CorrectResponse) %>%
   inner_join(demog, "Participant")
 
 ggplot(data = menrot_box_correct, 
-       aes(x = CorrectResponse, 
+       aes(x = CorrectResponse,  
            y = Mean_Time, 
            fill = CorrectResponse)) + 
   geom_boxplot() +
@@ -98,7 +98,6 @@ ggplot(data = menrot_better_plot,
   geom_col(position = position_dodge(.9)) +
   labs(x = "Sex of Participant", 
        y = "Percent Average (%)") +
-  guides(fill = FALSE) +
   facet_wrap(~CorrectResponse) +
   theme_classic()
 ```
