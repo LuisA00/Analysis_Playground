@@ -1,0 +1,41 @@
+---
+title: "Ch3_StartingWithData"
+author: "LA"
+date: "2024-03-31"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+```{r}
+dat <- read_csv("ahi-cesd.csv")
+pinfo <- read_csv("participant-info.csv")
+```
+```{r}
+all_dat <- inner_join(x = dat, 
+                      y = pinfo, 
+                      by = c("id", "intervention"))
+```
+
+```{r}
+summarydata <- select(.data = all_dat, 
+                      ahiTotal, 
+                      cesdTotal, 
+                      sex, 
+                      age, 
+                      educ, 
+                      income, 
+                      occasion,
+                      elapsed.days)
+```
+
+
+
+
+
+

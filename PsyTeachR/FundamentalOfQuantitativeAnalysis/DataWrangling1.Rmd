@@ -1,0 +1,79 @@
+---
+title: "DataWrangling1"
+author: "LA"
+date: "2024-04-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Load libraries.
+```{r}
+library(babynames)
+library(tidyverse)
+```
+```{r}
+dat <- babynames %>% 
+  filter(name %in% c("Emily",
+                     "Kathleen",
+                     "Alexandra",
+                     "Beverly"), sex=="F")
+
+ggplot(data = dat,
+       aes(x = year,
+           y = prop, 
+           colour = name))+
+  geom_line()  
+```
+```{r}
+babynames_reduced1 <- select(.data = babynames,
+                            year, 
+                            sex, 
+                            name, 
+                            prop)
+
+```
+
+```{r}
+sort_asc <- arrange(.data = babynames,
+                    name)
+```
+
+```{r}
+filt1 <- filter(.data = babynames, 
+                year > 2000)
+```
+
+```{r}
+baby_decades <- mutate(.data = babynames,
+                  decade = floor(year/10) *10)
+baby_decades
+```
+
+```{r}
+group_dat <- group_by(.data = dat,
+                      name) 
+
+group_sum <- summarise(.data = group_dat, 
+                       total = sum(n)) 
+group_sum
+```
+
+```{r}
+group_decades <- group_by(baby_decades, 
+                          sex, 
+                          decade)
+
+sum_decades <- summarise(group_decades,
+                         mean_year = mean(n),
+                         median_year = median(n))
+sum_decades
+```
+
+
+
+
+
+
