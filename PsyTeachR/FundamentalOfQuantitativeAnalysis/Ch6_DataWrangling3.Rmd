@@ -8,3 +8,59 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+```{r}
+responses <-  read_csv("responses.csv") # load in survey responses
+qformats <- read_csv("qformats.csv") # load in question formats
+scoring <-  read_csv("scoring.csv") # load in scoring info
+pinfo <- read_csv("pinfo.csv") # load in participant information
+```
+
+```{r}
+rlong <- pivot_longer(data = responses,
+                      cols = Q1:Q10,
+                      names_to = "Question", 
+                      values_to = "Response")
+
+```
+
+```{r}
+rlong2 <- inner_join(x = rlong, 
+                     y = qformats, 
+                     by = "Question")
+rlong2
+```
+
+```{r}
+rscores <- inner_join(rlong2, 
+                      scoring, 
+                      c("QFormat", "Response"))
+rscores 
+```
+
+```{r}
+aq_scores <- rscores %>% 
+             group_by(Id) %>%
+             summarise(AQ = sum(Score))
+aq_scores
+```
+```{r}
+aq_scores2 <- responses %>% 
+  pivot_longer(cols = Q1:Q10,
+               names_to = "Question", 
+               values_to = "Response") %>%  
+  inner_join(qformats, "Question") %>% 
+  inner_join(scoring, c("QFormat", "Response")) %>% 
+  group_by(Id) %>% 
+  summarise(AQ = sum(Score)) 
+```
+
+```{r}
+summarise(aq_scores, count = sum(aq_scores$AQ > 6))
+```
+
+
+
+
+
+
