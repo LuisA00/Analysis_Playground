@@ -1,0 +1,90 @@
+---
+title: "Ch5_DataWrangling2"
+author: "LA"
+date: "2024-04-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library("tidyverse")
+pong_data <- read_csv("PongBlueRedBack 1-16 Codebook.csv")
+summary(pong_data)
+```
+
+```{r}
+select_dat <- select(pong_data, Participant, PaddleLength, TrialNumber, BackgroundColor, HitOrMiss)
+
+reorder_dat <- select(pong_data, 
+                      BallSpeed, 
+                      HitOrMiss, 
+                      JudgedSpeed, 
+                      Participant, 
+                      TrialNumber)
+
+```
+
+```{r}
+arange_dat <- arrange(pong_data, desc(HitOrMiss), desc(JudgedSpeed))
+
+```
+
+```{r}
+pong_fast_miss <- filter(pong_data,  HitOrMiss==0,  JudgedSpeed == 1, 
+                         BallSpeed %in% c("2", "4", "5", "7"),)
+
+```
+
+```{r}
+pong_data_mut1 <- mutate(pong_data, 
+                    JudgedSpeedLabel = recode(JudgedSpeed, 
+                                                    "1" = "Fast", 
+                                                    "0" = "Slow"))
+```
+
+
+```{r}
+pong_data_renumbered <- filter(pong_data, TrialNumber > 1) %>%
+  mutate(TrialNumber = TrialNumber - 1)
+```
+
+```{r}
+pong_data_hits <- pong_data_renumbered %>% 
+  group_by(BackgroundColor, 
+           PaddleLength) %>% 
+  summarise(total_hits = sum(HitOrMiss, 
+                             na.rm = TRUE),
+            meanhits = mean(HitOrMiss, 
+                            na.rm = TRUE))
+pong_data_hits
+```
+
+```{r}
+pong_count <- pong_data_renumbered %>% 
+  group_by(BackgroundColor, 
+           PaddleLength) %>% 
+  summarise(total_hits = sum(HitOrMiss, 
+                             na.rm = TRUE),
+            meanhits = mean(HitOrMiss, 
+                            na.rm = TRUE),
+            n = n())
+pong_count
+```
+
+```{r}
+pong_data_ungroup <- pong_data %>%
+  group_by(BackgroundColor, 
+           PaddleLength) %>%
+  summarise(total_hits = sum(HitOrMiss)) %>%
+  ungroup
+pong_data_ungroup
+```
+
+
+
+
+
+
