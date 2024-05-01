@@ -1,0 +1,89 @@
+---
+title: "Ch9_Correlations"
+author: "LA"
+date: "2024-05-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(car) 
+library(correlation) 
+library(report) 
+library(psych) 
+library(tidyverse) 
+```
+
+```{r}
+
+mh <- read_csv("MillerHadenData.csv")
+
+```
+
+```{r}
+
+# Check if we have missing data. 
+is.na(mh)
+
+```
+
+```{r}
+ggplot(data = mh, aes(x = Abil)) +
+  geom_histogram()
+```
+
+
+```{r}
+ggplot(data = mh, aes(x = IQ)) +
+  geom_histogram()
+```
+
+```{r}
+qqPlot(x = mh$Abil)
+```
+ 
+```{r}
+ qqPlot(x = mh$IQ)
+```
+
+```{r}
+ggplot(data = mh, aes(x = Abil, y = IQ)) +
+  geom_point()+
+  geom_smooth(method = lm) +
+  scale_x_continuous("Reading ability")
+```
+
+
+```{r}
+descriptives <- summarise(mh, Abil_mean = mean(Abil), Abil_SD = sd(Abil), IQ_mean = mean(IQ), IQ_SD = sd(IQ))
+descriptives
+```
+
+```{r}
+results <- correlation(data = mh, 
+            select = "Abil", 
+            select2 = "IQ",  
+            method = "pearson", 
+            alternative = "two.sided")
+results
+```
+
+```{r}
+results2 <-  cor.test(x = mh$IQ, 
+                      y = mh$Abil, 
+                      method = "pearson", 
+                      alternative = "two.sided")
+results2
+
+```
+
+
+```{r}
+
+```
+
+
+
