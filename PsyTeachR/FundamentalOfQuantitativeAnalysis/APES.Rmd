@@ -1,0 +1,90 @@
+---
+title: "APES"
+author: "LA"
+date: "2024-06-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library("pwr")
+library("tidyverse")
+
+
+```
+```{r}
+
+t_val <- 3.24
+
+N <- 26 # df=25, add 1 df. 
+
+compute_d <- t_val/ sqrt(N)  #t_val/( (N)^(1/2) )
+
+
+```
+
+```{r}
+# Calculate between-subjects t-test. 
+
+# t(30) = 2.9, p < .05.
+
+computed_d2 <- (2*2.9) / sqrt(30)
+
+
+```
+
+```{r}
+#Group 1, M = 10, SD = 1.3, n = 30; Group 2, M = 11, SD = 1.7, n = 30.
+
+t_val3 <- (10 - 11)/sqrt((1.3^2/30) + (1.7^2/30))
+
+computed_d3 <- (2*t_val3)/sqrt((30-1) + (30-1))
+
+```
+
+```{r}
+pwr.t.test(d = .4,
+           power = .8,
+           sig.level = .05,
+           alternative = "two.sided",
+           type = "two.sample") %>% 
+  pluck("n") %>%
+  ceiling()
+```
+
+```{r}
+pwr.t.test(d = .23,
+           power = .8,
+           sig.level = .05,
+           alternative = "two.sided",
+           type = "one.sample") %>% 
+  pluck("n") %>%
+  ceiling()
+
+```
+
+```{r}
+pwr.t.test(n = 50,
+           power = .9,
+           sig.level = .05,
+           alternative = "two.sided", 
+           type = "two.sample") %>%
+  pluck("d") %>%
+  round(2)
+
+```
+
+```{r}
+
+sample_size_r <- pwr.r.test(r = .4, 
+                            sig.level = .05, 
+                            power = .8, 
+                            alternative = "two.sided") %>%
+  pluck("n") %>% 
+  ceiling()
+
+```
+

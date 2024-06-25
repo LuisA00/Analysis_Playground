@@ -1,0 +1,186 @@
+---
+title: "ttest"
+author: "LA"
+date: "2024-06-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library("Hmisc")
+library("broom")
+library("car")
+library("effectsize")
+library("report")
+library("tidyverse")
+```
+```{r}
+evaluators <- read_csv("evaluators.csv")
+
+```
+
+```{r}
+evaluators <- evaluators %>%
+  mutate(sex_labels = dplyr::recode(sex, "1" = "male", "2" = "female"),
+         sex_labels = as.factor(sex_labels),
+         condition = as.factor(condition))
+```
+
+
+```{r}
+eval_counts <- group_by(evaluators, sex_labels) %>%
+               count()
+
+
+
+```
+
+
+```{r}
+
+ratings <- read_csv("ratings.csv")
+
+#iratings <- filter(ratings, Category =="thoughtful" | Category =="competent" | Category =="intelligent") %>%
+#            group_by(eval_id) %>%
+#            summarise(mean=mean(Rating)) %>%
+#            mutate(Category = "Intellect")
+
+iratings <- ratings %>%
+  filter(Category %in% c("competent", "thoughtful", "intelligent"))
+
+# second step: calculate means for each evaluator
+imeans <- iratings %>%
+  group_by(eval_id) %>%
+  summarise(Rating = mean(Rating))
+
+# 3. add Category variable 
+# this way we can combine with 'impression' and 'hire' into a single table, very useful!
+imeans2 <- imeans %>%
+  mutate(Category = "intellect")
+
+# 4., 5. & 6. combine into a single table
+ratings2 <- ratings %>%
+  filter(Category %in% c("impression", "hire")) %>%
+  bind_rows(imeans2) %>%
+  inner_join(evaluators, "eval_id") %>%
+  select(-age, -sex) %>%
+  arrange(eval_id, Category)
+  
+group_means <- ratings2 %>%
+  group_by(condition, Category) %>%
+  summarise(n = n(), m = mean(Rating), sd = sd(Rating))
+
+
+
+```
+
+```{r}
+ratings2 %>%
+  filter(Category == "intellect") %>%
+ggplot(aes(x = condition, y = Rating)) +
+  geom_violin(trim = TRUE) +
+  geom_boxplot(aes(fill = condition), width = .2, show.legend = FALSE) + 
+  stat_summary(geom = "pointrange", fun.data = "mean_cl_normal")  +
+  labs(x = "Condition", y = "Rating Score") +
+  geom_jitter(height = .1, width = .2)
+```
+
+```{r}
+listened_intellect_residuals <- ratings2 %>%
+  filter(condition == "listened", Category == "intellect") %>%
+  mutate(group_resid = Rating - mean(Rating)) %>%
+  select(group_resid)
+
+qqPlot(listened_intellect_residuals$group_resid)
+```
+
+```{r}
+read_intellect_residuals <- ratings2 %>%
+  filter(condition == "read", Category == "intellect") %>%
+  mutate(group_resid = Rating - mean(Rating)) %>%
+  select(group_resid)
+
+qqPlot(read_intellect_residuals$group_resid)
+```
+
+```{r}
+shapiro.test(x = listened_intellect_residuals$group_resid)
+shapiro.test(x = read_intellect_residuals$group_resid)
+```
+
+```{r}
+intellect <- filter(ratings2, Category == "intellect")
+hire <- filter(ratings2, Category == "hire")
+impression <- filter(ratings2, Category == "impression") 
+
+intellect_t <- t.test(Rating ~ condition, 
+                      paired = FALSE, 
+                      data = intellect,
+                      alternative = "two.sided")
+
+results_intellect <- intellect_t %>%
+  tidy()
+
+results_intellect
+```
+
+```{r}
+hire_t <- t.test(Rating ~ condition, 
+                      paired = FALSE, 
+                      data = hire,
+                      alternative = "two.sided")
+
+impression_t <- t.test(Rating ~ condition, 
+                      paired = FALSE, 
+                      data = impression,
+                      alternative = "two.sided")
+```
+
+```{r}
+
+results_hire <- hire_t %>%
+  tidy()
+results_impression <- impression_t %>%
+  tidy()
+
+```
+
+```{r}
+results <- bind_rows(hire = results_hire, 
+                     impression = results_impression, 
+                     intellect = results_intellect, 
+                     .id = "test")
+
+results
+```
+
+```{r}
+results_adj <- results %>%
+  mutate(p.adjusted = p.adjust(p = p.value, 
+                               method = "bonferroni"))
+results_adj
+```
+ 
+```{r}
+intellect_d <- cohens_d(Rating ~ condition, 
+                      pooled_sd = FALSE, 
+                      data = intellect)
+print(intellect_d)
+
+hire_d <- cohens_d(Rating ~ condition, 
+                      pooled_sd = FALSE, 
+                      data = hire)
+
+print(hire_d)
+
+impression_d <- cohens_d(Rating ~ condition, 
+                      pooled_sd = FALSE, 
+                      data = impression)
+
+print(impression_d)
+```
+
+
