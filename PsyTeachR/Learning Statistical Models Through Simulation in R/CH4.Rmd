@@ -1,0 +1,73 @@
+---
+title: "CH4"
+output: html_document
+date: "2024-08-21"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+library("tidyverse")
+set.seed(1031)
+
+n_subj <- 100L  # simulate data for 100 subjects
+b0_urban <- 450 # y-intercept
+b1_urban <- 2   # slope
+
+# decomposition table
+urban <- tibble(
+  subj_id = 1:n_subj,
+  group = "urban",
+  b0 = 450,
+  b1 = 2,
+  dist_level = sample(0:n_subj, n_subj, replace = TRUE),
+  err = rnorm(n_subj, mean = 0, sd = 80),
+  simple_rt = b0 + b1 * dist_level + err)
+
+urban
+
+```
+
+```{r}
+b0_rural <- 500
+b1_rural <- 3
+
+rural <- tibble(
+  subj_id = 1:n_subj + n_subj,
+  group = "rural",
+  b0 = b0_rural,
+  b1 = b1_rural,
+  dist_level = sample(0:n_subj, n_subj, replace = TRUE),
+  err = rnorm(n_subj, mean = 0, sd = 80),
+  simple_rt = b0 + b1 * dist_level + err)
+```
+
+```{r}
+all_data <- bind_rows(urban, rural)
+
+ggplot(all_data %>% mutate(group = fct_relevel(group, "urban")), 
+       aes(dist_level, simple_rt, colour = group)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~ group) + 
+  theme(legend.position = "none")
+```
+
+```{r}
+all_data2 <- all_data %>%
+  mutate(grp = if_else(group == "rural", 1, 0))
+
+sonic_mod <- lm(simple_rt ~ dist_level + grp + dist_level:grp,
+                all_data2)
+
+summary(sonic_mod)
+```
+
+
+
+
+
+

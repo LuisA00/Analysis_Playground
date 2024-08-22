@@ -12,8 +12,113 @@ knitr::opts_chunk$set(echo = TRUE)
 library("corrr") # correlation matrices
 library("tidyverse")
 
-grades <- read_csv("grades.csv", col_types = "ddii")
+grades <- read_csv("grades2.csv", col_types = "ddii")
 
 grades
 ```
+
+```{r}
+grades %>%
+  correlate() %>%
+  shave() %>%
+  fashion()
+
+pairs(grades)
+```
+
+```{r}
+my_model <- lm(grade ~ lecture + nclicks, grades)
+
+summary(my_model)
+```
+
+```{r}
+## a 'tribble' is a way to make a tibble by rows,
+## rather than by columns. This is sometimes useful
+new_data <- tribble(~lecture, ~nclicks,
+                    3, 70,
+                    10, 130,
+                    0, 20,
+                    5, 100)
+
+# Add model preditions to dataframe. 
+new_data %>%
+  mutate(predicted_grade = predict(my_model, new_data))
+new_data
+```
+
+```{r}
+nclicks_mean <- grades %>% pull(nclicks) %>% mean()
+
+## new data for prediction
+new_lecture <- tibble(lecture = 0:10,
+                      nclicks = nclicks_mean)
+
+## add the predicted value to new_lecture
+new_lecture2 <- new_lecture %>%
+  mutate(grade = predict(my_model, new_lecture))
+
+ggplot(grades, aes(lecture, grade)) + 
+  geom_point() +
+  geom_line(data = new_lecture2)
+
+
+```
+
+```{r}
+mean(grades$nclicks)
+
+
+  
+```
+
+
+```{r}
+# Partial effect of nclicks on grade
+lecture_mean <- grades %>% pull(lecture) %>% mean()
+
+## new data for prediction
+new_tib <- tibble(lecture = lecture_mean,
+                  nclicks = rnorm(300, mean(grades$nclicks), sd(grades$nclicks)))
+
+## add the predicted value to new_lecture
+new_tib_pred <- new_tib %>%
+  mutate(grade = predict(my_model, new_tib))
+
+ggplot(grades, aes(nclicks, grade)) + 
+  geom_point() +
+  geom_line(data = new_tib_pred)
+
+
+```
+
+```{r}
+grades2 <- grades %>%
+  mutate(lecture_c = (lecture - mean(lecture)) / sd(lecture),
+         nclicks_c = (nclicks - mean(nclicks)) / sd(nclicks))
+
+my_model_scaled <- lm(grade ~ lecture_c + nclicks_c, grades2)
+
+summary(my_model_scaled)
+```
+
+```{r}
+fake_data <- tibble(Y = rnorm(10),
+                    group = rep(c("A", "B"), each = 5))
+
+fake_data2 <- fake_data %>%
+  mutate(group_d = if_else(group == "B", 1, 0))
+
+summary(lm(Y ~ group_d, fake_data2))
+
+fake_data3 <- fake_data %>%
+  mutate(group_d = if_else(group == "A", 1, 0))
+
+summary(lm(Y ~ group_d, fake_data3))
+# Betas, std and t-vals are the same regardless of coding scheme.
+```
+
+
+
+
 
